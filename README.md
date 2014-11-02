@@ -1,117 +1,54 @@
 -------------------------------------------------------------------------------
 CIS565: Project 5: WebGL
 -------------------------------------------------------------------------------
-Fall 2014
--------------------------------------------------------------------------------
-Due Monday 11/03/2014
--------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
 
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
-
--------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 INTRODUCTION:
 -------------------------------------------------------------------------------
-In this project, you will get introduced to the world of GLSL in two parts: 
-vertex shading and fragment shading. The first part of this project is the 
-Image Processor, and the second part of this project is a Wave Vertex Shader.
+Latest version of Firefox is required for this project.
+Part 1 is an implementation of a sin-shaded moving wave by GLSL vertex shading and fragment shading. 
 
-In the first part of this project, you will implement a GLSL vertex shader as 
-part of a WebGL demo. You will create a dynamic wave animation using code that 
-runs entirely on the GPU.
 
 In the second part of this project, you will implement a GLSL fragment shader
 to render an interactive globe in WebGL. This will include texture blending,
 bump mapping, specular masking, and adding a cloud layer to give your globe a 
 uniquie feel.
 
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
 
 -------------------------------------------------------------------------------
-PART 1 REQUIREMENTS:
+PART 1 WebGL Vertex Wave
 -------------------------------------------------------------------------------
+a dynamic wave animation using code that runs entirely on the GPU.
 
-In Part 1, you are given code for:
 
-* Drawing a VBO through WebGL
-* Javascript code for interfacing with WebGL
-* Functions for generating simplex noise
+**Height Shading**
 
-You are required to implement the following:
+The vertex grid will bw shaded based on height, and the colors chosen by user.
+The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
+![Height Shading](myPics/default_shading.png)
 
-* A sin-wave based vertex shader:
+Click Here for [Live Demo Page](https://github.com/dblsai/Project5-WebGL/vert_wave.html)
 
-![Example sin wave grid](resources/sinWaveGrid.png)
 
-* One interesting vertex shader of your choice
+ 
+**My Shading**
+I did the shading in the same file as first shading. And this time I include a drop-down menu to select between shading modes.
+In the drop-down menu, choose 'normal' or 'mine' to switch between height shading, and my shading mode.
 
--------------------------------------------------------------------------------
-PART 1 WALKTHROUGH:
--------------------------------------------------------------------------------
-**Sin Wave**
+![Height Shading](myPics/my_shading.png)
+In the vertex shader, find the property of a vertex:
+```
+xCol = clamp(position.x,0.0,1.0);
+yCol = clamp(position.y,0.0,1.0);
+zCol = clamp(height,0.0,1.0);
+```
 
-* For this assignment, you will need the latest version of Firefox.
-* Begin by opening index.html. You should see a flat grid of black and white 
-  lines on the xy plane:
+In the fragment shader, the color of a vertex is determined as follows:
+```gl_FragColor = vec4(xCol, yCol, zCol, 1.0);```
 
-![Example boring grid](resources/emptyGrid.png)
+Hence, the vertex is shading by its position.
 
-* In this assignment, you will animate the grid in a wave-like pattern using a 
-  vertex shader, and determine each vertex’s color based on its height, as seen 
-  in the example in the requirements.
-* The vertex and fragment shader are located in script tags in `index.html`.
-* The JavaScript code that needs to be modified is located in `index.js`.
-* Required shader code modifications:
-	* Add a float uniform named u_time.
-	* Modify the vertex’s height using the following code:
-
-	```glsl
-	float s_contrib = sin(position.x*2.0*3.14159 + u_time);
-	float t_contrib = cos(position.y*2.0*3.14159 + u_time);
-	float height = s_contrib*t_contrib;
-	```
-
-	* Use the GLSL mix function to blend together two colors of your choice based 
-	  on the vertex’s height. The lowest possible height should be assigned one 
-	  color (for example, `vec3(1.0, 0.2, 0.0)`) and the maximum height should be 
-	  another (`vec3(0.0, 0.8, 1.0)`). Use a varying variable to pass the color to 
-	  the fragment shader, where you will assign it `gl_FragColor`.
-
-  * Using dat.gui, you will add color pickers to modify the max and min colors
-    via GUI.  You will do this by adding the proper uniforms to the fragment
-    shader, and using the addColor function from dat.GUI.
-
-* Required JavaScript code modifications:
-	* A floating-point time value should be increased every animation step. 
-	  Hint: the delta should be less than one.
-	* To pass the time to the vertex shader as a uniform, first query the location 
-	  of `u_time` using `context.getUniformLocation` in `initializeShader()`. 
-	  Then, the uniform’s value can be set by calling `context.uniform1f` in 
-	  `animate()`.
-
-**Wave Of Your Choice**
-
-* Create another copy of `index.html`. Call it `index_custom.html`, or 
-  something similar.
-* Implement your own interesting vertex shader! In your README.md with your 
-  submission, describe your custom vertex shader, what it does, and how it 
-  works.
 
 -------------------------------------------------------------------------------
 PART 2 REQUIREMENTS:
@@ -263,38 +200,7 @@ finished globe with rim lighting.
 For more information on rim lighting, 
 read http://www.fundza.com/rman_shaders/surface/rim_effects/index.html.
 
--------------------------------------------------------------------------------
-GH-PAGES
--------------------------------------------------------------------------------
-Since this assignment is in WebGL you will make your project easily viewable by 
-taking advantage of GitHub's project pages feature.
 
-Once you are done you will need to create a new branch named gh-pages:
-
-`git branch gh-pages`
-
-Switch to your new branch:
-
-`git checkout gh-pages`
-
-Create an index.html file that is either your renamed frag_globe.html or 
-contains a link to it, commit, and then push as usual. Now you can go to 
-
-`<user_name>.github.io/<project_name>` 
-
-to see your beautiful globe from anywhere.
-
--------------------------------------------------------------------------------
-README
--------------------------------------------------------------------------------
-All students must replace or augment the contents of this Readme.md in a clear 
-manner with the following:
-
-* A brief description of the project and the specific features you implemented.
-* At least one screenshot of your project running.
-* A 30 second or longer video of your project running.  To create the video you
-  can use http://www.microsoft.com/expression/products/Encoder4_Overview.aspx 
-* A performance evaluation (described in detail below).
 
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
@@ -315,48 +221,3 @@ In this homework, we do not expect crazy performance evaluation in terms of
 optimizations.  However, it would be good to take performance benchmarks at
 every step in this assignment to see how complicated fragment shaders affect the
 overall speed.  You can do this by using stats.js.
-
--------------------------------------------------------------------------------
-THIRD PARTY CODE POLICY
--------------------------------------------------------------------------------
-* Use of any third-party code must be approved by asking on the Google groups.  
-  If it is approved, all students are welcome to use it.  Generally, we approve 
-  use of third-party code that is not a core part of the project.  For example, 
-  for the ray tracer, we would approve using a third-party library for loading 
-  models, but would not approve copying and pasting a CUDA function for doing 
-  refraction.
-* Third-party code must be credited in README.md.
-* Using third-party code without its approval, including using another 
-  student's code, is an academic integrity violation, and will result in you 
-  receiving an F for the semester.
-
--------------------------------------------------------------------------------
-SELF-GRADING
--------------------------------------------------------------------------------
-* On the submission date, email your grade, on a scale of 0 to 100, to Harmony, 
-  harmoli+cis565@seas.upenn.com, with a one paragraph explanation.  Be concise and 
-  realistic.  Recall that we reserve 30 points as a sanity check to adjust your 
-  grade.  Your actual grade will be (0.7 * your grade) + (0.3 * our grade).  We 
-  hope to only use this in extreme cases when your grade does not realistically 
-  reflect your work - it is either too high or too low.  In most cases, we plan 
-  to give you the exact grade you suggest.
-* Projects are not weighted evenly, e.g., Project 0 doesn't count as much as 
-  the path tracer.  We will determine the weighting at the end of the semester 
-  based on the size of each project.
-
----
-SUBMISSION
----
-As with the previous project, you should fork this project and work inside of
-your fork. Upon completion, commit your finished project back to your fork, and
-make a pull request to the master repository.  You should include a README.md
-file in the root directory detailing the following
-
-* A brief description of the project and specific features you implemented
-* At least one screenshot of your project running.
-* A link to a video of your project running.
-* Instructions for building and running your project if they differ from the
-  base code.
-* A performance writeup as detailed above.
-* A list of all third-party code used.
-* This Readme file edited as described above in the README section.

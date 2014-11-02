@@ -12,21 +12,17 @@
 
 <script id="vs" type="x-shader/x-vertex">
     precision highp float;
-
     uniform mat4 u_Model;
     uniform mat4 u_View;
     uniform mat4 u_Persp;
     uniform mat4 u_InvTrans;
-
     attribute vec3 Position;
     attribute vec3 Normal;
     attribute vec2 Texcoord;
-
     varying vec3 v_Normal;
     varying vec2 v_Texcoord;
     varying vec3 v_Position;
     varying vec3 v_positionMC;
-
     void main(void)
     {
         v_Normal = (u_InvTrans*vec4(Normal,0.0)).xyz;
@@ -41,11 +37,9 @@
 
 <script id="fs" type="x-shader/x-fragment">
     precision highp float;
-
     //View-Space directional light
     //A unit vector
     uniform vec3 u_CameraSpaceDirLight;
-
     //Diffuse texture map for the day
     uniform sampler2D u_DayDiffuse;
     //Ambient texture map for the night side
@@ -60,17 +54,13 @@
     uniform sampler2D u_EarthSpec;
     //Bump map
     uniform sampler2D u_Bump;
-
     uniform float u_time;
     uniform mat4 u_InvTrans;
-
     varying vec3 v_Normal;              // surface normal in camera coordinates
     varying vec2 v_Texcoord;
     varying vec3 v_Position;            // position in camera coordinates
     varying vec3 v_positionMC;          // position in model coordinates
-
     mat3 eastNorthUpToEyeCoordinates(vec3 positionMC, vec3 normalEC);
-
     void main(void)
     {
         // surface normal - normalized after rasterization
@@ -78,23 +68,34 @@
         // normalized eye-to-position vector in camera coordinates
         vec3 eyeToPosition = normalize(v_Position);
         
-        float diffuse = clamp(dot(u_CameraSpaceDirLight, normal), 0.0, 1.0);
-
+        float diffuse = dot(u_CameraSpaceDirLight, normal);
         vec3 toReflectedLight = reflect(-u_CameraSpaceDirLight, normal);
         float specular = max(dot(toReflectedLight, -eyeToPosition), 0.0);
         specular = pow(specular, 20.0);
-
-        float gammaCorrect = 1.0/1.2; //gamma correct by 1/1.2
-
+        float gammaCorrect = 1.0/1.2; 
         vec3 dayColor = texture2D(u_DayDiffuse, v_Texcoord).rgb;
         vec3 nightColor = texture2D(u_Night, v_Texcoord).rgb;
         //apply gamma correction to nighttime texture
         nightColor = pow(nightColor,vec3(gammaCorrect));
-
-        vec3 color = ((0.6 * diffuse) + (0.4 * specular)) * dayColor;
+        vec3 color;
+        float threshold = 0.05;
+        if(diffuse>threshold){
+            color = ( 0.6 * clamp(diffuse,0.0,1.0) + 0.4 * specular ) * dayColor;
+            //color = ( 0.6 * clamp(diffuse,0.0,1.0) + 0.4 * specular ) * mix(dayColor,nightColor, 1.0-diffuse);
+        
+        }
+        else if(diffuse<-threshold){
+           // color = ( 0.6 * clamp(-diffuse,0.0,1.0) + 0.4 * specular ) * mix(nightColor,dayColor,1.0+diffuse );
+            color = ( 0.6 * clamp(-diffuse,0.0,1.0) + 0.4 * specular) * nightColor;
+        }
+        else if(diffuse >= 0.0 && diffuse <= threshold){
+            color = 2.0 * ( 0.6 * clamp(diffuse,0.0,1.0) + 0.4 * specular ) * mix(nightColor,dayColor, 1.0-specular);
+        }
+        else if(diffuse <= 0.0 && diffuse >= -threshold){
+            color = 2.0 * ( 0.6 * clamp(-diffuse,0.0,1.0) + 0.4 * specular ) * mix(dayColor,nightColor,1.0+specular );
+        }
         gl_FragColor = vec4(color, 1.0);
     }
-
     mat3 eastNorthUpToEyeCoordinates(vec3 positionMC, vec3 normalEC)
     {
         // normalized surface tangent in model coordinates
@@ -103,7 +104,6 @@
         vec3 tangentEC = normalize(mat3(u_InvTrans) * tangentMC);
         // normalized surface bitangent in eye coordinates
         vec3 bitangentEC = normalize(cross(normalEC, tangentEC));
-
         return mat3(
             tangentEC.x,   tangentEC.y,   tangentEC.z,
             bitangentEC.x, bitangentEC.y, bitangentEC.z,
