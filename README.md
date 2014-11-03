@@ -41,8 +41,9 @@ In the fragment shader, the color of a vertex is determined as follows:
 
 Hence, the vertex is shading by its position.
 
-**Another Interesting Vertex Shader: Water By Perlin Noise**
+**Another Vertex Shader: Perlin Noise**
 reference: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+![Perlj=in Noise](myPics/custom_wave2.png)
 
 **Mouse Interaction**
 I migrated the mouse interaction from Globe to here. This add more interactivity to the simulation.
@@ -68,7 +69,7 @@ Reference: http://www.script-tutorials.com/webgl-with-three-js-lesson-5/
 http://math.hws.edu/eck/cs424/notes2013/webgl/skybox-and-reflection/skybox.html
 
 
-![The Final Globe](resources/globe_day.png)
+![The Final Globe](myPics/my_globe.png)
 
 
 
@@ -78,6 +79,7 @@ http://math.hws.edu/eck/cs424/notes2013/webgl/skybox-and-reflection/skybox.html
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
 Vertex Wave: ~60 fps
+Custom Perlin Noise Wave: ~56 fps
 
 -------------------------------------------------------------------------------
 REFERENCES

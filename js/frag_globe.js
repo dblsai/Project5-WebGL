@@ -3,6 +3,7 @@
     /*global window,document,Float32Array,Uint16Array,mat4,vec3,snoise*/
     /*global getShaderSource,createWebGLContext,createProgram*/
 
+
     var NUM_WIDTH_PTS = 64;
     var NUM_HEIGHT_PTS = 64;
 
@@ -13,6 +14,11 @@
         return;
     }
 
+/*var imported = document.createElement('script');
+imported.src = 'lib/stats.min.js';
+imported.type = "text/javascript";
+document.head.appendChild(imported);
+var stats = new Stats();*/
     ///////////////////////////////////////////////////////////////////////////
 
     gl.viewport(0, 0, canvas.width, canvas.height);
