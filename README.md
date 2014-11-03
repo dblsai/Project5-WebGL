@@ -42,10 +42,12 @@ In the fragment shader, the color of a vertex is determined as follows:
 
 Hence, the vertex is shading by its position.
 
-**Another Vertex Shader: Perlin Noise**  
-reference: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
-Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave_custom.html)  
-![Perlj=in Noise](myPics/custom_wave2.png)
+**Another Vertex Shader: Perlin Noise**   
+
+Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave_custom.html)   
+
+![Perljin Noise](myPics/custom_wave2.png)  
+
 I tried to implement a perlin noise vertex shader, and the result looks interesting though doesn't looks correct as a perlin noise.  
 Firstly, I created a index permutation lookup table, and a gradient lookup table, and loaded them and 2D texture to the vertex shader.  
 In the vertex shader, I used the position of vertex for find its index permutation and gradient. For each vertex, the noise comtribution is summer for four vertices, i.e, `x,y`, `x,y+1`, `x+1,y`, `x+1,y+1`. Then, calculate normal from gradient and position. Lastly mix the noise contribution in 3 directions `x`, `y`,`z`, and get a `float` value noise, which should be used as the height value in vertex shader.
@@ -66,9 +68,9 @@ You are also required to pick one open-ended effect to implement:
 * Cloud shadows via ray-tracing through the cloud map in the fragment shader  
 I did it though find the light direction, and shade the shadow according to cloud transparency map.  
 * Draw a skybox around the entire scene for the stars  
-I tried to load a skybox into the scene, but failed in initializing the cube mesh. Succeded in loading textures for skybox.  
-Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)
-![The Final Globe](myPics/my_globe.png)
+I tried to load a skybox into the scene, but failed in initializing the cube mesh. Succeded in loading textures for skybox.    
+Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)  
+![The Final Globe](myPics/my_globe.png)  
 
 
 
