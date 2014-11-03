@@ -2,20 +2,19 @@
 <html>
 
 <head>
-<title>Vertex Wave</title>
+<title>Custom Wave</title>
 <meta charset ="utf-8">
 <meta http-equiv="X-UA-Compatible" content="chrome=1">  <!-- Use Chrome Frame in IE --> 
 </head>
 
+
 <body>
-<h1>Vertex Wave by WebGL</h1>
+<h1>Perlin noise Wave by WebGL</h1>
 <div id="message" style="position:absolute;top:100px"></div> <!-- Pixel offset to avoid FPS counter -->
 <canvas id="canvas" style="border: none;" width="1024" height="768" tabindex="1"></canvas>
 <script src ="js/lib/gl-matrix.js" type ="text/javascript"></script>
 <script src ="js/webGLUtility.js" type ="text/javascript"></script>
 <script src="js/lib/dat.gui.min.js" type="text/javascript"></script>
-<script src="js/lib/stats.min.js"></script>
-
 
 <script id="vs" type="x-shader/x-vertex">
    attribute vec2 position;
@@ -25,18 +24,73 @@
     varying float xCol;
     varying float yCol;
     varying float zCol;
+    uniform sampler2D u_waterHeight;  
+    uniform sampler2D u_grad; 
+    //reference: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+
+    float fade(float t) {
+      // return t*t*(3.0-2.0*t); // Old fade, yields discontinuous second derivative
+      return t*t*t*(t*(t*6.0-15.0)+10.0); // Improved fade, yields C2-continuous noise
+    }
+    float get_grad(vec2 p, vec3 d){
+      return dot(texture2D(u_grad, p).rgb, d);
+    }
+    float get_perm(vec2 p){
+      return  texture2D(u_waterHeight, p).a ;
+    }
+
+    float pnoise3D(vec3 P){
+       float ONE = 0.00390625; // 1/ 256
+      float HALF = 0.001953125;  //0.5/256
+      vec3 Pi = ONE*floor(P)+HALF; // Integer part, scaled so +1 moves one texel
+                                      // and offset 1/2 texel to sample texel centers
+      vec3 Pf = fract(P);     // Fractional part for interpolation
+
+      // Noise contributions from (x=0, y=0), z=0 and z=1
+      float perm00 = get_perm(Pi.xy);//texture2D(u_waterHeight, Pi.xy).a ;
+      float n000 = get_grad(vec2(perm00, Pi.z), Pf);
+      float n001 = get_grad(vec2(perm00, Pi.z + ONE), Pf - vec3(0.0, 0.0, 1.0));
+
+      // Noise contributions from (x=0, y=1), z=0 and z=1
+      float perm01 = get_perm(Pi.xy + vec2(0.0, ONE));//texture2D(u_waterHeight, Pi.xy + vec2(0.0, ONE)).a ;
+      float n010 = get_grad(vec2(perm01, Pi.z), Pf - vec3(0.0, 1.0, 0.0));
+      float n011 = get_grad(vec2(perm01, Pi.z + ONE), Pf - vec3(0.0, 1.0, 1.0));
+
+      // Noise contributions from (x=1, y=0), z=0 and z=1
+      float perm10 = get_perm(Pi.xy + vec2(ONE, 0.0));//texture2D(u_waterHeight, Pi.xy + vec2(ONE, 0.0)).a ;
+      float n100 = get_grad(vec2(perm10, Pi.z), Pf - vec3(1.0, 0.0, 0.0));
+      float n101 = get_grad(vec2(perm10, Pi.z + ONE), Pf - vec3(1.0, 0.0, 1.0));
+
+      // Noise contributions from (x=1, y=1), z=0 and z=1
+      float perm11 = get_perm(Pi.xy + vec2(ONE, ONE));//texture2D(u_waterHeight, Pi.xy + vec2(ONE, ONE)).a ;
+      float n110 = get_grad(vec2(perm11, Pi.z), Pf - vec3(1.0, 1.0, 0.0));
+      float n111 = get_grad(vec2(perm11, Pi.z + ONE), Pf - vec3(1.0, 1.0, 1.0));
+
+      return mix(
+        mix( mix(n000,n100,fade(Pf.x)), mix(n010,n110,fade(Pf.x)), fade(Pf.y) ),
+        mix( mix(n001,n101,fade(Pf.x)), mix(n011,n111,fade(Pf.x)), fade(Pf.y) ),
+        fade(Pf.z)
+        );
+
+    }
     void main(void)
     {
       // NOTE : according to the WebGL standard, 0.0f is not accepted
-      float s_contrib = sin(position.x*2.0*3.14159 + u_time);
-      float t_contrib = cos(position.y*2.0*3.14159 + u_time);
-      height = s_contrib*t_contrib;
+      
+     //height = pnoise2D( vec2( position.x*4.0+u_time, position.y*4.0+u_time) );  //2D perlin noise  -----> not very good
+     height = pnoise3D( vec3( position.x*4.0+u_time, position.y*4.0+u_time,0.0) ); 
+
       xCol = clamp(position.x,0.0,1.0);
       yCol = clamp(position.y,0.0,1.0);
       zCol = clamp(height,0.0,1.0);
       // NOTE : gl_Position is always a vec4
       gl_Position = u_modelViewPerspective * vec4(vec3(position, height), 1.0);
     }
+
+    
+
+   
+
 </script>
 
 <script id="fs" type="x-shader/x-fragment">
@@ -54,6 +108,7 @@
       // NOTE : gl_FragColor is always a vec4
      // gl_FragColor = u_color;
      if(u_shade == 0){
+
         if(height>0.0)
           gl_FragColor = height*u_highCol + (1.0-height)*(u_lowCol+u_highCol);
         else if(height<0.0)
@@ -68,20 +123,6 @@
 </script>
 
 <script>
-var stats = new Stats();
-stats.setMode( 1 );
-// align top-left
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.left = '500px';
-stats.domElement.style.top = '0px';
-
-document.body.appendChild( stats.domElement );
-
-var update = function () {
-
-stats.begin();
-
-
   // Globals
   var positionLocation = 0;
   var heightLocation = 1;
@@ -114,6 +155,12 @@ stats.begin();
   var azimuth = Math.PI;
   var elevation = 0.0001;
 
+ 
+  var u_waterHeightLocation;
+  var u_gradLocation;
+  var waterTex;
+  var gradTex;
+
   var ControllerText = function() {
    // this.anotherShading = false;
     this.shadingMode = 'normal';
@@ -124,6 +171,8 @@ stats.begin();
    // this.color3 = { h: 350, s: 0.9, v: 0.3 }; // Hue, saturation, value
   };
   
+
+
   // Function called when the window is loaded
   window.onload = function() {
     // Add GUI component 
@@ -134,6 +183,7 @@ stats.begin();
    // var shadingController = gui.add(cText, 'anotherShading');
     var shadingController = gui.add(cText, 'shadingMode',['normal','mine']);
     gui.remember(cText);
+
     lowController.onChange(function(value) {
       //do the change when controller is hit
       u_lowCol[0] = parseFloat(value[0])/255.0;
@@ -143,6 +193,7 @@ stats.begin();
     
      // alert("The new color is " + u_lowCol);
     });
+
     highController.onChange(function(value) {
       //do the change when controller is hit
       u_highCol[0] = parseFloat(value[0])/255.0;
@@ -151,6 +202,7 @@ stats.begin();
       u_highCol[3] = 1.0;
      // alert("The new color is " + u_highCol);
     });
+
    shadingController.onChange(function(value){
   //  alert("value is "+ value)
     // shading = value;
@@ -159,6 +211,7 @@ stats.begin();
       else if(value == 'mine')
         u_shade = 1;
    });
+
     lowController.onFinishChange(function(value) {
       // Fires when a controller loses focus.
       u_lowCol = u_lowCol;
@@ -167,9 +220,19 @@ stats.begin();
       // Fires when a controller loses focus.
       u_highCol = u_highCol;
     });
+
     init();
     animate();
   };
+  
+  //waterTex  = context.createTexture();
+  //gradTex = context.createTexture();
+ // initializeTexture(waterTex, "assets/waterHeightMap.png");
+
+ //referemnce: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+
+
+ 
 
   function init() {
     message = document.getElementById("message");
@@ -179,7 +242,6 @@ stats.begin();
       return;
     }
     // SET UP WEBGL CONTEXT
-
     context.viewport(0, 0, canvas.width, canvas.height);
     context.clearColor(1.0, 1.0, 1.0, 1.0);
     context.enable(context.DEPTH_TEST);
@@ -189,75 +251,15 @@ stats.begin();
     initializeShader();
     initializeGrid(); 
 
+    
     canvas.onmousedown = handleMouseDown;
     canvas.oncontextmenu = function(ev) {return false;};
     document.onmouseup = handleMouseUp;
     document.onmousemove = handleMouseMove;
   }
 
-  var mouseLeftDown = false;
-    var mouseRightDown = false;
-    var lastMouseX = null;
-    var lastMouseY = null;
+ 
 
-    function handleMouseDown(event) {
-        if( event.button == 2 ) {
-            mouseLeftDown = false;
-            mouseRightDown = true;
-        }
-        else {
-            mouseLeftDown = true;
-            mouseRightDown = false;
-        }
-        lastMouseX = event.clientX;
-        lastMouseY = event.clientY;
-    }
-
-    function handleMouseUp(event) {
-        mouseLeftDown = false;
-        mouseRightDown = false;
-    }
-
-    function handleMouseMove(event) {
-        if (!(mouseLeftDown || mouseRightDown)) {
-            return;
-        }
-
-        var newX = event.clientX;
-        var newY = event.clientY;
-
-        var deltaX = newX - lastMouseX;
-        var deltaY = newY - lastMouseY;
-        
-        if( mouseLeftDown )
-        {
-            azimuth += 0.01 * deltaX;
-            elevation += 0.01 * deltaY;
-            elevation = Math.min(Math.max(elevation, -Math.PI/2+0.001), Math.PI/2-0.001);
-        }
-        else
-        {
-            radius += 0.01 * deltaY;
-            radius = Math.min(Math.max(radius, 2.0), 10.0);
-        }
-        eye = sphericalToCartesian(radius, azimuth, elevation);
-        view = mat4.create();
-        mat4.lookAt(eye, center, up, view);
-
-        lastMouseX = newX;
-        lastMouseY = newY;
-       // alert("new view eye position:" + eye);
-    }
-
-    function sphericalToCartesian( r, a, e ) {
-        var x = r * Math.cos(e) * Math.cos(a);
-        var y = r * Math.sin(e);
-        var z = r * Math.cos(e) * Math.sin(a);
-
-        return [x,y,z];
-    }
-    
-  
   function animate(){
     // Update
     var model = mat4.create();
@@ -277,8 +279,20 @@ stats.begin();
     context.uniform4fv(u_lowColLocation, u_lowCol);
     context.uniform4fv(u_colorLocation, u_color);
     context.uniform1i(u_shadeLocation, u_shade);
+
+    context.activeTexture(context.TEXTURE0);
+    context.bindTexture(context.TEXTURE_2D, waterTex);
+    context.uniform1i(u_waterHeightLocation, 0);
+
+    context.activeTexture(context.TEXTURE1);
+    context.bindTexture(context.TEXTURE_2D, gradTex);
+    context.uniform1i(u_gradLocation, 1);
+
     window.requestAnimFrame(animate);  //loop itself for animation
   }
+
+ 
+
   function initializeShader() {
     var program;
     var vs = getShaderSource(document.getElementById("vs"));
@@ -291,8 +305,45 @@ stats.begin();
     u_highColLocation = context.getUniformLocation(program,"u_highCol");
     u_lowColLocation = context.getUniformLocation(program,"u_lowCol");
     u_shadeLocation = context.getUniformLocation(program,"u_shade");
+    u_gradLocation = context.getUniformLocation(program,"u_grad");
+    u_waterheightLocation = context.getUniformLocation(program, "u_waterHeight");
+
+
+  //perlin noise initialize
+      var perm = [151,160,137,91,90,15,
+  131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+  190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+  88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+  77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+  102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+  135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+  5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+  223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+  129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+  251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+  49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+  138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+
+      var grad = [  1,1,0,    -1,1,0,    1,-1,0,    -1,-1,0,
+
+                      1,0,1,    -1,0,1,    1,0,-1,    -1,0,-1,
+
+                      0,1,1,    0,-1,1,    0,1,-1,    0,-1,-1,
+
+                      1,1,0,    0,-1,1,    -1,1,0,    0,-1,-1 ];
+
+     waterTex  = context.createTexture();
+     gradTex = context.createTexture();
+
+     var permArray = new Uint8Array( perm );
+    var gradArray = new Uint8Array( grad );
+    initializeTexture( waterTex, permArray, context.ALPHA, 256, 1 );
+    initializeTexture( gradTex, gradArray, context.RGB, 16, 1 );
+
     context.useProgram(program);
   }
+
+
   function initializeGrid() {
     function uploadMesh(positions, heights, indices) {
       // Positions
@@ -355,13 +406,110 @@ stats.begin();
     numberOfIndices = indices.length;
 }
 
-stats.end();
+ function initializeTexture( texture, data, format, width, height )
+    {
+        context.bindTexture(context.TEXTURE_2D, texture);
 
-    requestAnimationFrame( update );
+        //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, data );
+        context.texImage2D( context.TEXTURE_2D, 0, format, width, height, 0, format, context.UNSIGNED_BYTE, data )
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.NEAREST );
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.NEAREST );
 
-};
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.REPEAT );
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE );
+        context.bindTexture(context.TEXTURE_2D, null);
+    }
 
-requestAnimationFrame( update );
+  /*function initializeTexture(texture, src) {
+      texture.image = new Image();
+      texture.image.onload = function() {
+          initLoadedTexture(texture);
+
+          // Animate once textures load.
+          if (++textureCount === 6) {
+              animate();
+          }
+      }
+      texture.image.src = src;
+  }
+
+  function initLoadedTexture(texture){
+        context.bindTexture(context.TEXTURE_2D, texture);
+        context.pixelStorei(context.UNPACK_FLIP_Y_WEBGL, true);
+        context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, texture.image);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, gcontext.LINEAR);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.LINEAR);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.REPEAT);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.REPEAT);
+        context.bindTexture(context.TEXTURE_2D, null);
+    }
+*/
+
+
+
+
+     var mouseLeftDown = false;
+    var mouseRightDown = false;
+    var lastMouseX = null;
+    var lastMouseY = null;
+
+    function handleMouseDown(event) {
+        if( event.button == 2 ) {
+            mouseLeftDown = false;
+            mouseRightDown = true;
+        }
+        else {
+            mouseLeftDown = true;
+            mouseRightDown = false;
+        }
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+    }
+
+    function handleMouseUp(event) {
+        mouseLeftDown = false;
+        mouseRightDown = false;
+    }
+
+    function handleMouseMove(event) {
+        if (!(mouseLeftDown || mouseRightDown)) {
+            return;
+        }
+
+        var newX = event.clientX;
+        var newY = event.clientY;
+
+        var deltaX = newX - lastMouseX;
+        var deltaY = newY - lastMouseY;
+        
+        if( mouseLeftDown )
+        {
+            azimuth += 0.01 * deltaX;
+            elevation += 0.01 * deltaY;
+            elevation = Math.min(Math.max(elevation, -Math.PI/2+0.001), Math.PI/2-0.001);
+        }
+        else
+        {
+            radius += 0.01 * deltaY;
+            radius = Math.min(Math.max(radius, 2.0), 10.0);
+        }
+        eye = sphericalToCartesian(radius, azimuth, elevation);
+        view = mat4.create();
+        mat4.lookAt(eye, center, up, view);
+
+        lastMouseX = newX;
+        lastMouseY = newY;
+       // alert("new view eye position:" + eye);
+    }
+
+    function sphericalToCartesian( r, a, e ) {
+        var x = r * Math.cos(e) * Math.cos(a);
+        var y = r * Math.sin(e);
+        var z = r * Math.cos(e) * Math.sin(a);
+
+        return [x,y,z];
+    }
+    
 
 </script>
 
