@@ -20,8 +20,6 @@ The vertex grid will bw shaded based on height, and the colors chosen by user.
 The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
 ![Height Shading](myPics/height_shading.png)
 
-Click Here for [Live Demo Page](https://github.com/dblsai/Project5-WebGL/vert_wave.html)
-
 
  
 **My Shading**
@@ -68,8 +66,9 @@ You are also required to pick one open-ended effect to implement:
 Reference: http://www.script-tutorials.com/webgl-with-three-js-lesson-5/
 http://math.hws.edu/eck/cs424/notes2013/webgl/skybox-and-reflection/skybox.html
 
-
+Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)
 ![The Final Globe](myPics/my_globe.png)
+
 
 
 
