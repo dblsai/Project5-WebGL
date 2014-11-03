@@ -61,11 +61,10 @@ PART 2 Globe
 
 You are also required to pick one open-ended effect to implement:
 
-* Procedural water rendering and animation using noise 
-* Shade based on altitude using the height map
-* Cloud shadows via ray-tracing through the cloud map in the fragment shader
+* Cloud shadows via ray-tracing through the cloud map in the fragment shader  
+I did it though find the light direction, and shade the shadow according to cloud transparency map.  
 * Draw a skybox around the entire scene for the stars  
-
+I tried to load a skybox into the scene, but failed in initializing the cube mesh. Succeded in loading textures for skybox.  
 Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)
 ![The Final Globe](myPics/my_globe.png)
 
