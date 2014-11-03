@@ -3,6 +3,7 @@ CIS565: Project 5: WebGL
 -------------------------------------------------------------------------------
 
 Latest version of Firefox is required for this project.  
+
 Part 1 is an implementation of a sin-shaded moving wave by GLSL vertex shading and fragment shading.  
 
 Part 2 is an implementation of a GLSL fragment shader to render an interactive globe in WebGL.  
@@ -17,7 +18,7 @@ I migrated the mouse interaction from Globe to here. This add more interactivity
 
 
 **Height Shading**  
-
+Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave.html)
 The vertex grid will bw shaded based on height, and the colors chosen by user.
 The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
 ![Height Shading](myPics/height_shading.png)
@@ -43,8 +44,9 @@ Hence, the vertex is shading by its position.
 
 **Another Vertex Shader: Perlin Noise**  
 reference: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave_custom.html)  
 ![Perlj=in Noise](myPics/custom_wave2.png)
-I tried to implement a perlin noise vertex shader, and the result looks interesting through doesn't looks correct as a perlin noise.  
+I tried to implement a perlin noise vertex shader, and the result looks interesting though doesn't looks correct as a perlin noise.  
 Firstly, I created a index permutation lookup table, and a gradient lookup table, and loaded them and 2D texture to the vertex shader.  
 In the vertex shader, I used the position of vertex for find its index permutation and gradient. For each vertex, the noise comtribution is summer for four vertices, i.e, `x,y`, `x,y+1`, `x+1,y`, `x+1,y+1`. Then, calculate normal from gradient and position. Lastly mix the noise contribution in 3 directions `x`, `y`,`z`, and get a `float` value noise, which should be used as the height value in vertex shader.
 
