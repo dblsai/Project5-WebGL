@@ -59,7 +59,7 @@ I tried to load a skybox into the scene, but failed in initializing the cube mes
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
-Vertex Wave: ~60 fps
+Vertex Wave: ~60 fps  
 Custom Perlin Noise Wave: ~56 fps
 
 -------------------------------------------------------------------------------
