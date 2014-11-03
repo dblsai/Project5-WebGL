@@ -14,7 +14,7 @@ PART 1 WebGL Vertex Wave
 a dynamic wave animation using code that runs entirely on the GPU.
 
 
-**Height Shading**
+**Height Shading**  
 
 The vertex grid will bw shaded based on height, and the colors chosen by user.
 The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
@@ -22,7 +22,7 @@ The maxima will be shaded with `highColor`, and the minima will be shaded with `
 
 
  
-**My Shading**
+**My Shading**  
 I did the shading in the same file as first shading. And this time I include a drop-down menu to select between shading modes.
 In the drop-down menu, choose 'normal' or 'mine' to switch between height shading, and my shading mode.
 
@@ -39,11 +39,11 @@ In the fragment shader, the color of a vertex is determined as follows:
 
 Hence, the vertex is shading by its position.
 
-**Another Vertex Shader: Perlin Noise**
+**Another Vertex Shader: Perlin Noise**  
 reference: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 ![Perlj=in Noise](myPics/custom_wave2.png)
 
-**Mouse Interaction**
+**Mouse Interaction**  
 I migrated the mouse interaction from Globe to here. This add more interactivity to the simulation.
 
 
