@@ -17,29 +17,11 @@ A dynamic wave animation using code that runs entirely on the GPU.
 I migrated the mouse interaction from Globe to here. This add more interactivity to the simulation.
 
 
-**Height Shading**  
+**Sine Based Vertex Shader**  
 The vertex grid will bw shaded based on height, and the colors chosen by user.
 The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
 [![Height Shading](myPics/height_shading.png)](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave.html)
 
-
- 
-**My Shading**  
-I did the shading in the same file as first shading. And this time I include a drop-down menu to select between shading modes.
-In the drop-down menu, choose 'normal' or 'mine' to switch between height shading, and my shading mode.
-
-![Height Shading](myPics/my_shading.png)
-In the vertex shader, find the property of a vertex:
-```
-xCol = clamp(position.x,0.0,1.0);
-yCol = clamp(position.y,0.0,1.0);
-zCol = clamp(height,0.0,1.0);
-```
-
-In the fragment shader, the color of a vertex is determined as follows:
-```gl_FragColor = vec4(xCol, yCol, zCol, 1.0);```
-
-Hence, the vertex is shading by its position.
 
 **Another Vertex Shader: Perlin Noise**   
 
