@@ -18,7 +18,7 @@ I migrated the mouse interaction from Globe to here. This add more interactivity
 
 
 **Height Shading**  
-Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave.html)
+Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave.html)  
 The vertex grid will bw shaded based on height, and the colors chosen by user.
 The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
 ![Height Shading](myPics/height_shading.png)
@@ -69,7 +69,7 @@ You are also required to pick one open-ended effect to implement:
 I did it though find the light direction, and shade the shadow according to cloud transparency map.  
 * Draw a skybox around the entire scene for the stars  
 I tried to load a skybox into the scene, but failed in initializing the cube mesh. Succeded in loading textures for skybox.    
-Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)  
+Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)    
 ![The Final Globe](myPics/my_globe.png)  
 
 
