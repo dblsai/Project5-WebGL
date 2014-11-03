@@ -11,7 +11,9 @@ Part 2 is an implementation of a GLSL fragment shader to render an interactive g
 -------------------------------------------------------------------------------
 PART 1 WebGL Vertex Wave
 -------------------------------------------------------------------------------
-a dynamic wave animation using code that runs entirely on the GPU.
+A dynamic wave animation using code that runs entirely on the GPU.
+**Mouse Interaction**  
+I migrated the mouse interaction from Globe to here. This add more interactivity to the simulation.
 
 
 **Height Shading**  
@@ -42,9 +44,9 @@ Hence, the vertex is shading by its position.
 **Another Vertex Shader: Perlin Noise**  
 reference: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 ![Perlj=in Noise](myPics/custom_wave2.png)
-
-**Mouse Interaction**  
-I migrated the mouse interaction from Globe to here. This add more interactivity to the simulation.
+I tried to implement a perlin noise vertex shader, and the result looks interesting through doesn't looks correct as a perlin noise.  
+Firstly, I created a index permutation lookup table, and a gradient lookup table, and loaded them and 2D texture to the vertex shader.  
+In the vertex shader, I used the position of vertex for find its index permutation and gradient. For each vertex, the noise comtribution is summer for four vertices, i.e, `x,y`, `x,y+1`, `x+1,y`, `x+1,y+1`. Then, calculate normal from gradient and position. Lastly mix the noise contribution in 3 directions `x`, `y`,`z`, and get a `float` value noise, which should be used as the height value in vertex shader.
 
 
 -------------------------------------------------------------------------------
@@ -62,9 +64,7 @@ You are also required to pick one open-ended effect to implement:
 * Procedural water rendering and animation using noise 
 * Shade based on altitude using the height map
 * Cloud shadows via ray-tracing through the cloud map in the fragment shader
-* Draw a skybox around the entire scene for the stars
-Reference: http://www.script-tutorials.com/webgl-with-three-js-lesson-5/
-http://math.hws.edu/eck/cs424/notes2013/webgl/skybox-and-reflection/skybox.html
+* Draw a skybox around the entire scene for the stars  
 
 Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)
 ![The Final Globe](myPics/my_globe.png)
@@ -83,8 +83,8 @@ Custom Perlin Noise Wave: ~56 fps
 -------------------------------------------------------------------------------
 REFERENCES
 -------------------------------------------------------------------------------
-Perlin Noise & Simplex Noise: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
-A Very Good FPS recorder:  https://github.com/mrdoob/stats.js
-SKYBOX: http://stackoverflow.com/questions/10079368/how-would-i-do-environment-reflection-in-webgl-without-using-a-library-like-thre/10093646#10093646
-SKYBOX:   http://math.hws.edu/eck/cs424/notes2013/webgl/skybox-and-reflection/skybox.html 
-SKYBOX:   http://www.script-tutorials.com/webgl-with-three-js-lesson-5/ 
+Perlin Noise & Simplex Noise: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl  
+A Very Good FPS recorder:  https://github.com/mrdoob/stats.js  
+SKYBOX: http://stackoverflow.com/questions/10079368/how-would-i-do-environment-reflection-in-webgl-without-using-a-library-like-thre/10093646#10093646  
+SKYBOX:   http://math.hws.edu/eck/cs424/notes2013/webgl/skybox-and-reflection/skybox.html   
+SKYBOX:   http://www.script-tutorials.com/webgl-with-three-js-lesson-5/   
