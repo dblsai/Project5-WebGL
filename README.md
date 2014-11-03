@@ -18,10 +18,9 @@ I migrated the mouse interaction from Globe to here. This add more interactivity
 
 
 **Height Shading**  
-Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave.html)  
 The vertex grid will bw shaded based on height, and the colors chosen by user.
 The maxima will be shaded with `highColor`, and the minima will be shaded with `lowColor`
-![Height Shading](myPics/height_shading.png)
+[![Height Shading](myPics/height_shading.png)](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave.html)
 
 
  
@@ -44,9 +43,8 @@ Hence, the vertex is shading by its position.
 
 **Another Vertex Shader: Perlin Noise**   
 
-Click Here for [Live Demo Page](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave_custom.html)   
 
-![Perljin Noise](myPics/custom_wave2.png)  
+[![Perljin Noise](myPics/custom_wave2.png)](https://dl.dropboxusercontent.com/u/53181465/webGL/vert_wave_custom.html) 
 
 I tried to implement a perlin noise vertex shader, and the result looks interesting though doesn't looks correct as a perlin noise.  
 Firstly, I created a index permutation lookup table, and a gradient lookup table, and loaded them and 2D texture to the vertex shader.  
@@ -68,9 +66,8 @@ You are also required to pick one open-ended effect to implement:
 * Cloud shadows via ray-tracing through the cloud map in the fragment shader  
 I did it though find the light direction, and shade the shadow according to cloud transparency map.  
 * Draw a skybox around the entire scene for the stars  
-I tried to load a skybox into the scene, but failed in initializing the cube mesh. Succeded in loading textures for skybox.    
-Click Here for [Live Demo Page](https://dblsai.github.io/Project5-WebGL)    
-![The Final Globe](myPics/my_globe.png)  
+I tried to load a skybox into the scene, but failed in initializing the cube mesh. Succeded in loading textures for skybox.      
+[![The Final Globe](myPics/my_globe.png)] (https://dblsai.github.io/Project5-WebGL)    
 
 
 
